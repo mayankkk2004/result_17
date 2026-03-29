@@ -4,7 +4,6 @@ import requests
 import random
 import string
 from bs4 import BeautifulSoup
-import os
 import solve_with_neurons
 import opencsv
 from concurrent.futures import ThreadPoolExecutor
@@ -157,14 +156,12 @@ class resultProcessor:
                 #FIXME HackFIX 2000!
             except Exception as e:
                 print(e)
-                self.fail = True
                 continue
-            else:
-                break
         else:
+            # All retries exhausted without a successful return
             self.fail = True
     def processResult(self,html,rollSuffix):
-        list = []
+        row = []
         soup=BeautifulSoup(html,'html5lib')
         with self.lock:
             self.totalStudents = self.totalStudents + 1
@@ -172,8 +169,8 @@ class resultProcessor:
         name=soup.find('td',text=re.compile("Name")).findNext().text.replace("\n",'').strip()
         roll=soup.find('td',text=re.compile("Roll")).findNext().text.replace("\n",'').strip()
         with self.lock:
-            list.append(roll)
-            list.append(name)
+            row.append(roll)
+            row.append(name)
         tables=soup.findAll("table")[0].findAll("table")[2].findAll("tr")[6].findAll("table")
         with self.lock:
             if self.firstEntry is True:
@@ -191,18 +188,18 @@ class resultProcessor:
 
 
         for tableNumber in range(1,len(tables)):
-            list.append(tables[tableNumber].findAll('td')[3].text.replace("\n",'').replace("##","*").strip())
+            row.append(tables[tableNumber].findAll('td')[3].text.replace("\n",'').replace("##","*").strip())
         result_des=soup.find("th", text=re.compile(".*CGPA.*")).parent.findNext("td")
         if(result_des.text.replace("\n",'').strip() == "PASS" or result_des.text.replace("\n",'').strip() == "PASS WITH GRACE"):
             with self.lock:
                 self.passStudents = self.passStudents + 1
         SGPA=result_des.findNext("td")
         CGPA=SGPA.findNext("td")
-        list.append(SGPA.text.replace("\n",'').strip())
-        list.append(CGPA.text.replace("\n",'').strip())
-        list.append('"'+result_des.text.replace("\n",'').strip()+'"')
+        row.append(SGPA.text.replace("\n",'').strip())
+        row.append(CGPA.text.replace("\n",'').strip())
+        row.append('"'+result_des.text.replace("\n",'').strip()+'"')
         with self.lock:
-            self.tables[int(rollSuffix)] = list
+            self.tables[int(rollSuffix)] = row
 
 
 
@@ -211,15 +208,15 @@ class resultProcessor:
             return(500) # Internal server error
         if self.maxroll != self.progress.progress :
             return(601) ## Not 100% progress
-        list = sorted(self.tables.items())
+        sorted_rows = sorted(self.tables.items())
         if self.numberOfColumns:
             entry = []
             for t in range(self.numberOfColumns-1):
                 entry.append("")
             entry.append(str(self.passStudents)+"/"+str(self.totalStudents)+" = "+ "{0:.2f}".format(self.passStudents*100/self.totalStudents) + "%")
-            list.append((0,entry))
-            list.append((1,[]))
-            self.worksheet.bulkappend(list)
+            sorted_rows.append((0,entry))
+            sorted_rows.append((1,[]))
+            self.worksheet.bulkappend(sorted_rows)
             return(self.worksheet.getcsv())
         else:
             return(701) ## No result Found

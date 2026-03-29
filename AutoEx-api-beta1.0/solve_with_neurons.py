@@ -2,15 +2,13 @@ import sys
 import os
 stderr = sys.stderr
 sys.stderr = open(os.devnull, 'w')
-import sys
 import sklearn.preprocessing
 
 sys.modules['sklearn.preprocessing.label'] = sklearn.preprocessing
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 sys.stderr = stderr
 
 from helpers import resize_to_fit
-from imutils import paths
 import numpy as np
 import cv2
 import pickle
@@ -25,9 +23,8 @@ with open(MODEL_LABELS_FILENAME, "rb") as f:
 
 # Load the trained neural network
 model = load_model(MODEL_FILENAME)
-model.make_predict_function()
-
-#model._make_predict_function()
+if hasattr(model, 'make_predict_function'):
+    model.make_predict_function()
 def Solve(img_str):
     # Load the image and convert it to grayscale
 

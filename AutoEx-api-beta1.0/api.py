@@ -3,7 +3,7 @@ from waitress import serve
 from time import sleep, time
 import threading
 import main
-import queue
+import queue as queue_module
 import json
 from flask_cors import CORS
 import sys
@@ -11,12 +11,12 @@ import sys
 app = Flask(__name__)
 CORS(app)
 obj={}
-queue=queue.Queue(maxsize=0)
+task_queue=queue_module.Queue(maxsize=0)
 
 def worker():
     while True:
         try:
-            uuid=queue.get()
+            uuid=task_queue.get()
             print(uuid)
             obj[uuid][0].start()
         except Exception as e:
@@ -39,7 +39,7 @@ class Project:
         #request = (request.json['maxroll'],)
         uuid = main.randomString()
         obj[uuid] = [main.resultProcessor(int(request.json['department']), int(request.json['semester']), int(request.json['maxroll']), request.json['rollPrefix']), time()]
-        queue.put(uuid)
+        task_queue.put(uuid)
         response = app.response_class(
         response=json.dumps({'uuid':uuid}),
         status=200,
@@ -79,9 +79,8 @@ class Project:
 
 
 if __name__ == '__main__':
-    workerThread = threading.Thread(target=worker, name="Worker")
-    janitorThread = threading.Thread(target=janitor, name="Janitor")
+    workerThread = threading.Thread(target=worker, name="Worker", daemon=True)
+    janitorThread = threading.Thread(target=janitor, name="Janitor", daemon=True)
     workerThread.start()
     janitorThread.start()
-    serve(app, port=sys.argv[1])
-    #app.run(debug=True,port='8080')
+    serve(app, port=int(sys.argv[1]))

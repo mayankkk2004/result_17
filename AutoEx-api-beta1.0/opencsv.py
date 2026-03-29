@@ -1,4 +1,3 @@
-import os
 import threading
 class opencsv:
     def __init__(self):
@@ -10,7 +9,7 @@ class opencsv:
         with self.lock:
             for entry in data:
                 self.file = self.file + entry
-                if entry is data[-1]:
+                if entry == data[-1]:
                     self.file = self.file + "\n"
                 else:
                     self.file = self.file+ ","
