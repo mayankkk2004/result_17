@@ -1,4 +1,4 @@
-#!/usr/bin/env3 pyhton
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import requests
 import random
