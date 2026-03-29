@@ -1,12 +1,12 @@
 bs4
-keras
 tensorflow
 numpy
 opencv-python
 requests
 imutils
-scikit-learn  
+scikit-learn
 flask
 flask-cors
 waitress
 html5lib
+h5py

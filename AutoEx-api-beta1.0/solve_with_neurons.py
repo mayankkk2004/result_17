@@ -18,14 +18,21 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 MODEL_FILENAME = "captcha_model.hdf5"
 MODEL_LABELS_FILENAME = "model_labels.dat"
 
-with open(MODEL_LABELS_FILENAME, "rb") as f:
-    lb = pickle.load(f)
-
-# Load the trained neural network
-model = load_model(MODEL_FILENAME)
-if hasattr(model, 'make_predict_function'):
-    model.make_predict_function()
+try:
+    with open(MODEL_LABELS_FILENAME, "rb") as f:
+        lb = pickle.load(f)
+    # Load the trained neural network
+    model = load_model(MODEL_FILENAME)
+    if hasattr(model, 'make_predict_function'):
+        model.make_predict_function()
+except Exception as e:
+    print(f"[solve_with_neurons] Warning: could not load model: {e}")
+    lb = None
+    model = None
 def Solve(img_str):
+    if model is None or lb is None:
+        print("[solve_with_neurons] Model not loaded, cannot solve captcha.")
+        return False
     # Load the image and convert it to grayscale
 
     nparr = np.frombuffer(img_str, np.uint8)
