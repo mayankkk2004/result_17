@@ -31,7 +31,7 @@ model.make_predict_function()
 def Solve(img_str):
     # Load the image and convert it to grayscale
 
-    nparr = np.fromstring(img_str, np.uint8)
+    nparr = np.frombuffer(img_str, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR) # cv2.IMREAD_COLOR in OpenCV 3.1
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

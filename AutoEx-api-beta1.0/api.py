@@ -18,15 +18,16 @@ def worker():
         try:
             uuid=queue.get()
             print(uuid)
-        except:
-            pass
-        obj[uuid][0].start()
+            obj[uuid][0].start()
+        except Exception as e:
+            print(e)
 
 def janitor():
-    sleep(2700)
-    for elements in obj:
-        if time() - elements[1] > 2700:
-            del elements
+    while True:
+        sleep(2700)
+        keys_to_delete = [uuid for uuid in obj if time() - obj[uuid][1] > 2700]
+        for uuid in keys_to_delete:
+            del obj[uuid]
 
 class Project:
     @app.route('/')

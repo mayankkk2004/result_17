@@ -1,4 +1,4 @@
-#!/usr/bin/env3 pyhton
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import requests
 import random
@@ -105,11 +105,9 @@ class resultProcessor:
 
             except Exception as e:
                 print(e) # error on console
-                self.fail = True
                 continue
-            else:
-                break
         else:
+            # All retries exhausted without a successful return
             self.fail = True
     def getResult(self, roll):
         for _ in range(10):
