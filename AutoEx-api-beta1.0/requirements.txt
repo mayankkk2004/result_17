@@ -1,0 +1,12 @@
+bs4
+keras
+tensorflow
+numpy
+opencv-python
+requests
+imutils
+scikit-learn  
+flask
+flask-cors
+waitress
+html5lib
