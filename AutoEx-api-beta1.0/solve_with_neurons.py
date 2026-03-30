@@ -2,15 +2,13 @@ import sys
 import os
 stderr = sys.stderr
 sys.stderr = open(os.devnull, 'w')
-import sys
 import sklearn.preprocessing
 
 sys.modules['sklearn.preprocessing.label'] = sklearn.preprocessing
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 sys.stderr = stderr
 
 from helpers import resize_to_fit
-from imutils import paths
 import numpy as np
 import cv2
 import pickle
@@ -20,18 +18,24 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 MODEL_FILENAME = "captcha_model.hdf5"
 MODEL_LABELS_FILENAME = "model_labels.dat"
 
-with open(MODEL_LABELS_FILENAME, "rb") as f:
-    lb = pickle.load(f)
-
-# Load the trained neural network
-model = load_model(MODEL_FILENAME)
-model.make_predict_function()
-
-#model._make_predict_function()
+try:
+    with open(MODEL_LABELS_FILENAME, "rb") as f:
+        lb = pickle.load(f)
+    # Load the trained neural network
+    model = load_model(MODEL_FILENAME)
+    if hasattr(model, 'make_predict_function'):
+        model.make_predict_function()
+except Exception as e:
+    print(f"[solve_with_neurons] Warning: could not load model: {e}")
+    lb = None
+    model = None
 def Solve(img_str):
+    if model is None or lb is None:
+        print("[solve_with_neurons] Model not loaded, cannot solve captcha.")
+        return False
     # Load the image and convert it to grayscale
 
-    nparr = np.fromstring(img_str, np.uint8)
+    nparr = np.frombuffer(img_str, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR) # cv2.IMREAD_COLOR in OpenCV 3.1
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

@@ -1,0 +1,5 @@
+# Treat model and data files as binary to prevent line-ending or encoding corruption
+*.hdf5 binary
+*.dat binary
+*.pkl binary
+*.h5 binary
